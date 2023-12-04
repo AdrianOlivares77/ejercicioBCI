@@ -1,0 +1,4 @@
+patterns:
+  passwordUsuarioPattern:
+    pattern: ^.{4,}$
+    mensaje: "la contraseña debe ser de una largo de minimo 4 caracteres"
