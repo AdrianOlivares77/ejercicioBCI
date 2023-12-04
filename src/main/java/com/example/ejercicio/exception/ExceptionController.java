@@ -44,4 +44,12 @@ public class ExceptionController {
         errors.put("mensaje", ex.getMessage());
         return errors;
     }
+
+    @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(UsuarioNoExisteException.class)
+    public Map<String, String> handleUsuarioNoExisteException(UsuarioNoExisteException ex) {
+        Map<String,String> errors =  new HashMap<String, String>();
+        errors.put("mensaje", ex.getMessage());
+        return errors;
+    }
 }

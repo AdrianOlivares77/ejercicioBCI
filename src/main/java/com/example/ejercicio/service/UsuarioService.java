@@ -1,8 +1,8 @@
 package com.example.ejercicio.service;
 
 import com.example.ejercicio.dto.CrearUsuarioResponseDto;
-import com.example.ejercicio.dto.UsuarioDto;
+import com.example.ejercicio.dto.CrearUsuarioRequestDto;
 
 public interface UsuarioService {
-    CrearUsuarioResponseDto crearUsuario (UsuarioDto requestDto);
+    CrearUsuarioResponseDto crearUsuario (CrearUsuarioRequestDto requestDto);
 }
