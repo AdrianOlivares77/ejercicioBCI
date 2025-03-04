@@ -2,16 +2,17 @@ package com.example.ejercicio.service;
 
 import com.example.ejercicio.configuration.PatternProperties;
 import com.example.ejercicio.dto.*;
-import com.example.ejercicio.exception.ContraseñaInvalidaException;
+import com.example.ejercicio.exception.ContrasenaInvalidaException;
 import com.example.ejercicio.exception.UsuarioNoExisteException;
 import com.example.ejercicio.repository.JPARepository;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -19,7 +20,6 @@ public class UsuarioServiceImpl implements UsuarioService{
 
     private final JPARepository usuariosRepository;
     private final TokenServiceImpl tokenService;
-
     private final PatternProperties patternProperties;
 
     public UsuarioServiceImpl(JPARepository usuariosRepository, TokenServiceImpl tokenService, PatternProperties patternProperties) {
@@ -30,15 +30,17 @@ public class UsuarioServiceImpl implements UsuarioService{
 
     public CrearUsuarioResponseDto crearUsuario (CrearUsuarioRequestDto requestDto){
         try {
-            validarContraseñaPattern(requestDto.getContraseña());
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            String formattedDateTime = LocalDateTime.now().format(formatter);
+            validarContrasenaPattern(requestDto.getContrasenia());
             UsuarioDto nuevoUsuario = new UsuarioDto();
             nuevoUsuario.setNombre(requestDto.getNombre());
             nuevoUsuario.setCorreo(requestDto.getCorreo());
-            nuevoUsuario.setContraseña(requestDto.getContraseña());
+            nuevoUsuario.setContrasenia(requestDto.getContrasenia());
             nuevoUsuario.setTelefonosList(requestDto.getTelefonosList());
-            nuevoUsuario.setCreado(String.valueOf(new Date()));
-            nuevoUsuario.setModificado(String.valueOf(new Date()));
-            nuevoUsuario.setUltimoLogin(String.valueOf(new Date()));
+            nuevoUsuario.setCreado((formattedDateTime));
+            nuevoUsuario.setModificado(formattedDateTime);
+            nuevoUsuario.setUltimoLogin(formattedDateTime);
             nuevoUsuario.setToken(tokenService.login(requestDto.getNombre()));
             nuevoUsuario.setActivo(true);
 
@@ -59,81 +61,98 @@ public class UsuarioServiceImpl implements UsuarioService{
         }
     }
 
-    private void validarContraseñaPattern(String contraseña) {
+    private void validarContrasenaPattern(String contrasena) {
         String pattern = patternProperties.getPasswordUsuarioPattern().getPattern();
-        if(!contraseña.matches(pattern)){
-            throw new ContraseñaInvalidaException("contraseña no cumple con el pattern establecido");
+        if(!contrasena.matches(pattern)){
+            throw new ContrasenaInvalidaException("La contraseña no cumple con el pattern establecido");
         }
-        return;
     }
 
     public List<UsuarioDto> obtenerTodosLosUsuarios() {
         return usuariosRepository.findAll();
     }
 
-    public Optional<UsuarioDto> eliminarUsuario(String id) {
+    public EliminarUsuarioResponseDto eliminarUsuario(String id) {
         Optional<UsuarioDto> usuario;
+        EliminarUsuarioResponseDto usuarioEliminado;
         try {
             usuario = usuariosRepository.findById(id);
             if (usuario.isPresent()) {
                 usuariosRepository.deleteById(id);
+                usuarioEliminado = new EliminarUsuarioResponseDto();
+                usuarioEliminado.setId(usuario.get().getId());
             } else {
-                throw new UsuarioNoExisteException("usuario a eliminar no existe");
+                throw new UsuarioNoExisteException("Usuario a eliminar no existe");
             }
         } catch (DataAccessException e) {
             log.debug(String.valueOf(e.getCause()));
             throw e;
         }
-        return usuario;
+        return usuarioEliminado;
     }
 
-    public UsuarioDto modificarUsuario (String id, ModificarUsuarioRequestDto usuario) {
+    public ModificarUsuarioResponseDto modificarUsuario (String id, ModificarUsuarioRequestDto usuario) {
 
-        validarContraseñaPattern(usuario.getContraseña());
+        validarContrasenaPattern(usuario.getContrasenia());
         UsuarioDto usuarioAModificar;
+        ModificarUsuarioResponseDto usuarioResponse;
 
         try {
             usuarioAModificar = usuariosRepository.findUsuarioById(id);
 
             if (usuarioAModificar != null) {
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                String formattedDateTime = LocalDateTime.now().format(formatter);
                 usuarioAModificar.setNombre(usuario.getNombre());
                 usuarioAModificar.setActivo(usuario.isActivo());
                 usuarioAModificar.setCorreo(usuario.getCorreo());
-                usuarioAModificar.setContraseña(usuario.getContraseña());
+                usuarioAModificar.setContrasenia(usuario.getContrasenia());
                 usuarioAModificar.setTelefonosList(usuario.getTelefonosList());
-                usuarioAModificar.setModificado(String.valueOf(new Date()));
+                usuarioAModificar.setModificado(formattedDateTime);
                 usuarioAModificar.setCreado(usuarioAModificar.getCreado());
                 usuarioAModificar.setToken(usuarioAModificar.getToken());
                 usuarioAModificar.setUltimoLogin(usuarioAModificar.getUltimoLogin());
+
                 usuariosRepository.save(usuarioAModificar);
-            }
-            else {
-                throw new UsuarioNoExisteException("usuario con esa id no existe");
+
+                usuarioResponse = new ModificarUsuarioResponseDto();
+                usuarioResponse.setId(id);
+                usuarioResponse.setNombre(usuarioAModificar.getNombre());
+                usuarioResponse.setActivo(usuarioAModificar.isActivo());
+                usuarioResponse.setCorreo(usuarioAModificar.getCorreo());
+                usuarioResponse.setContrasenia(usuarioAModificar.getContrasenia());
+                usuarioResponse.setTelefonosList(usuarioAModificar.getTelefonosList());
+                usuarioResponse.setModificado(formattedDateTime);
+                usuarioResponse.setCreado(usuarioAModificar.getCreado());
+                usuarioResponse.setToken(usuarioAModificar.getToken());
+                usuarioResponse.setUltimoLogin(usuarioAModificar.getUltimoLogin());
+            } else {
+                throw new UsuarioNoExisteException("Usuario con esa id no existe");
             }
 
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return usuarioAModificar;
+        return usuarioResponse;
     }
 
-    public ActualizarContraseñaResponseDto actualizarContraseña (String id, ActualizarContraseñaRequestDto requestDto){
+    public ActualizarContrasenaResponseDto actualizarContrasena(String id, ActualizarContrasenaRequestDto requestDto){
 
-        validarContraseñaPattern(requestDto.getContraseña());
-        UsuarioDto usuarioACambiarContraseña;
+        validarContrasenaPattern(requestDto.getContrasenia());
+        UsuarioDto usuarioACambiarContrasena;
 
         try {
-            usuarioACambiarContraseña = usuariosRepository.findUsuarioById(id);
-            if (usuarioACambiarContraseña != null){
-                usuarioACambiarContraseña.setContraseña(requestDto.getContraseña());
-                usuariosRepository.save(usuarioACambiarContraseña);
+            usuarioACambiarContrasena = usuariosRepository.findUsuarioById(id);
+            if (usuarioACambiarContrasena != null){
+                usuarioACambiarContrasena.setContrasenia(requestDto.getContrasenia());
+                usuariosRepository.save(usuarioACambiarContrasena);
             } else {
                 throw new UsuarioNoExisteException("usuario con esa id no existe");
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        ActualizarContraseñaResponseDto response = new ActualizarContraseñaResponseDto();
+        ActualizarContrasenaResponseDto response = new ActualizarContrasenaResponseDto();
         response.setResultado("Contraseña actualizada correctamente");
         return response;
     }

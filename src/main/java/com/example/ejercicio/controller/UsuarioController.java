@@ -8,8 +8,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @Validated
@@ -22,34 +20,34 @@ public class UsuarioController {
         this.usuarioService = usuarioService;
     }
 
-    @PostMapping(value = "/crear")
+    @PostMapping(value = "")
     public ResponseEntity<CrearUsuarioResponseDto> crearUsuario (@RequestBody @Valid CrearUsuarioRequestDto requestDto){
         CrearUsuarioResponseDto response = usuarioService.crearUsuario(requestDto);
         return ResponseEntity.ok(response);
     }
 
 
-    @GetMapping(value = "/obtenerTodos")
-    public ResponseEntity<List<UsuarioDto>> getAllUsers(){
+    @GetMapping(value = "")
+    public ResponseEntity<List<UsuarioDto>> obtenerUsuarios(){
         List<UsuarioDto> usuarios = usuarioService.obtenerTodosLosUsuarios();
         return ResponseEntity.ok(usuarios);
     }
 
-    @PutMapping("/modificar/{id}")
-    public ResponseEntity<UsuarioDto> update(@RequestBody @Valid ModificarUsuarioRequestDto requestDto, @PathVariable String id) {
-        UsuarioDto response = usuarioService.modificarUsuario(id, requestDto);
+    @PutMapping("/{id}")
+    public ResponseEntity<ModificarUsuarioResponseDto> modificarUsuario(@RequestBody @Valid ModificarUsuarioRequestDto requestDto, @PathVariable String id) {
+        ModificarUsuarioResponseDto response = usuarioService.modificarUsuario(id, requestDto);
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/eliminar/{id}")
-    public ResponseEntity<Optional<UsuarioDto>> delete(@PathVariable String id) {
-        Optional<UsuarioDto> response = usuarioService.eliminarUsuario(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<EliminarUsuarioResponseDto> eliminarUsuarios(@PathVariable String id) {
+        EliminarUsuarioResponseDto response = usuarioService.eliminarUsuario(id);
         return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/actualizarContrasena/{id}")
-    public ResponseEntity<ActualizarContraseñaResponseDto> updatePassword(@PathVariable String id, @RequestBody ActualizarContraseñaRequestDto requestDto) {
-        ActualizarContraseñaResponseDto response = usuarioService.actualizarContraseña(id, requestDto);
+    public ResponseEntity<ActualizarContrasenaResponseDto> actualizarContrasenia(@PathVariable String id, @RequestBody ActualizarContrasenaRequestDto requestDto) {
+        ActualizarContrasenaResponseDto response = usuarioService.actualizarContrasena(id, requestDto);
         return ResponseEntity.ok(response);
     }
 }

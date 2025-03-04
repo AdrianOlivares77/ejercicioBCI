@@ -5,7 +5,6 @@ import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
-import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.util.List;
 
@@ -25,7 +24,7 @@ public class UsuarioDto implements Serializable {
     private String correo;
 
 
-    private String contraseña;
+    private String contrasenia;
 
     @ElementCollection(fetch= FetchType.EAGER)
     @CollectionTable(joinColumns = @JoinColumn(name = "id"))

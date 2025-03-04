@@ -26,7 +26,7 @@ public class CrearUsuarioRequestDto implements Serializable {
     private String correo;
 
     @NotEmpty(message = "Campo contraseña no puede estar vacio")
-    private String contraseña;
+    private String contrasenia;
 
     @ElementCollection(fetch= FetchType.EAGER)
     @CollectionTable(joinColumns = @JoinColumn(name = "id"))

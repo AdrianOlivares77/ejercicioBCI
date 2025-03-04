@@ -1,10 +1,7 @@
 package com.example.ejercicio.dto;
 
 import lombok.Data;
-import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.*;
-import javax.validation.constraints.Email;
 import java.util.List;
 
 @Data
@@ -16,7 +13,7 @@ public class ModificarUsuarioResponseDto {
 
     private String correo;
 
-    private String contraseña;
+    private String contrasenia;
 
     private List<TelefonoDto> telefonosList;
 
