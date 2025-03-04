@@ -66,7 +66,7 @@ class UsuarioServiceImplSpec extends Specification {
         )
 
         and: "el patrón de contraseña esperado"
-        def patternMensajeDto = new PatternMensajeDto(pattern: "^.{4,}\$") // Establecemos un patrón válido
+        def patternMensajeDto = new PatternMensajeDto(pattern: "^.{4,}\$")
         patternProperties.getPasswordUsuarioPattern() >> patternMensajeDto
 
         when: "llamamos al método crearUsuario"
@@ -100,7 +100,7 @@ class UsuarioServiceImplSpec extends Specification {
 
         then: "el usuario es eliminado correctamente"
         response.id == "1"
-        1 * usuariosRepository.deleteById("1") // Verificamos que deleteById haya sido llamado una vez
+        1 * usuariosRepository.deleteById("1")
     }
 
     def "actualizarContrasena deberia actualizar la contrasena de un usuario"() {
