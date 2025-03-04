@@ -14,7 +14,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable()
-                .addFilterAfter(new JWTAuthorization(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(new JWTAuthorizationConfig(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeRequests()
                 .antMatchers(HttpMethod.POST, "/token/login").permitAll()
                 .anyRequest().authenticated();
