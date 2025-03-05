@@ -1,14 +1,16 @@
 package com.example.ejercicio.dto;
 
-import lombok.Data;
-import org.hibernate.annotations.GenericGenerator;
-
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.util.List;
+import lombok.Data;
+import org.hibernate.annotations.GenericGenerator;
 
+/**
+ * Clase de request para el endpoint de creación de usuarios.
+ */
 @Data
 public class CrearUsuarioRequestDto implements Serializable {
 

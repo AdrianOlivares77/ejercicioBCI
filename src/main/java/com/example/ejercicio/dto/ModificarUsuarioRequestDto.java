@@ -1,13 +1,14 @@
 package com.example.ejercicio.dto;
 
-import lombok.Data;
-import org.hibernate.annotations.GenericGenerator;
-
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import java.util.List;
+import lombok.Data;
 
+/**
+ * Clase de request para el endpoint de modificación de usuarios.
+ */
 @Data
 public class ModificarUsuarioRequestDto {
 

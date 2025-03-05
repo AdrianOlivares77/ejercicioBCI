@@ -1,10 +1,12 @@
 package com.example.ejercicio.dto;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Clase para obtener datos del pattern de validacion de contraseña.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

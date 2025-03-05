@@ -1,13 +1,15 @@
 package com.example.ejercicio.dto;
 
-import lombok.Data;
-import org.hibernate.annotations.GenericGenerator;
-
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import java.io.Serializable;
 import java.util.List;
+import lombok.Data;
+import org.hibernate.annotations.GenericGenerator;
 
+/**
+ * Clase de Usuario con sus respectivos datos.
+ */
 @Data
 @Entity
 public class UsuarioDto implements Serializable {

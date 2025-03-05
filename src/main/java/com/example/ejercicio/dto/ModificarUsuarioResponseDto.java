@@ -1,9 +1,11 @@
 package com.example.ejercicio.dto;
 
+import java.util.List;
 import lombok.Data;
 
-import java.util.List;
-
+/**
+ * Clase de response para el endpoint de modificación de usuarios.
+ */
 @Data
 public class ModificarUsuarioResponseDto {
 

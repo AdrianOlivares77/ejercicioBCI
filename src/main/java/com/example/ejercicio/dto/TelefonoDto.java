@@ -1,11 +1,13 @@
 package com.example.ejercicio.dto;
 
+import javax.persistence.Embeddable;
+import javax.validation.constraints.NotEmpty;
 import lombok.Data;
 
-import javax.persistence.Embeddable;
-import javax.persistence.Entity;
-import javax.validation.constraints.NotEmpty;
 
+/**
+ * Clase Telefono con sus datos.
+ */
 @Data
 @Embeddable
 public class TelefonoDto {

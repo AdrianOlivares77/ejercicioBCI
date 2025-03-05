@@ -2,6 +2,9 @@ package com.example.ejercicio.dto;
 
 import lombok.Data;
 
+/**
+ * Clase de response para el endpoint de creación de usuarios.
+ */
 @Data
 public class CrearUsuarioResponseDto {
     private String creado;

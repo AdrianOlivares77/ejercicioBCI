@@ -1,9 +1,11 @@
 package com.example.ejercicio.dto;
 
+import javax.persistence.Embeddable;
 import lombok.Data;
 
-import javax.persistence.Embeddable;
-
+/**
+ * Clase de Token.
+ */
 @Data
 @Embeddable
 public class TokenDto {

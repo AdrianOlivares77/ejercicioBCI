@@ -6,6 +6,9 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+/**
+ * JPARepository para manejar acciones CRUD en Base de Datos.
+ */
 @Repository
 public interface JPARepository extends JpaRepository<UsuarioDto,String> {
     public Optional<UsuarioDto> findById(String id);
