@@ -1,9 +1,9 @@
 package com.example.ejercicio.controller;
 
-import javax.validation.Valid;
-import java.util.List;
+import com.example.ejercicio.controller.mapper.UsuarioMapper;
 import com.example.ejercicio.dto.*;
 import com.example.ejercicio.service.UsuarioServiceImpl;
+import javax.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -18,12 +18,17 @@ public class UsuarioController {
 
     private final UsuarioServiceImpl usuarioService;
 
+    private final UsuarioMapper usuarioMapper;
+
     /**
      * Constructor.
+     *
      * @param usuarioService clase de usuarioService.
+     * @param usuarioMapper clase de mapper para el controlador.
      */
-    public UsuarioController(UsuarioServiceImpl usuarioService) {
+    public UsuarioController(UsuarioServiceImpl usuarioService, UsuarioMapper usuarioMapper) {
         this.usuarioService = usuarioService;
+        this.usuarioMapper = usuarioMapper;
     }
 
     /**
@@ -33,8 +38,9 @@ public class UsuarioController {
      */
     @PostMapping
     public ResponseEntity<CrearUsuarioResponseDto> crearUsuario (@RequestBody @Valid CrearUsuarioRequestDto requestDto){
-        CrearUsuarioResponseDto response = usuarioService.crearUsuario(requestDto);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(usuarioMapper.toCrearUsuarioResponseDto(
+                usuarioService.crearUsuario(
+                        requestDto)));
     }
 
     /**
@@ -42,9 +48,9 @@ public class UsuarioController {
      * @return ResponseEntity OK 200.
      */
     @GetMapping
-    public ResponseEntity<List<UsuarioDto>> obtenerUsuarios(){
-        List<UsuarioDto> usuarios = usuarioService.obtenerTodosLosUsuarios();
-        return ResponseEntity.ok(usuarios);
+    public ResponseEntity<ObtenerUsuariosResponseDto> obtenerUsuarios(){
+        return ResponseEntity.ok(UsuarioMapper.toObtenerUsuariosResponseDto(
+                usuarioService.obtenerTodosLosUsuarios()));
     }
 
     /**
@@ -54,8 +60,10 @@ public class UsuarioController {
      */
     @PutMapping("/{id}")
     public ResponseEntity<ModificarUsuarioResponseDto> modificarUsuario(@RequestBody @Valid ModificarUsuarioRequestDto requestDto, @PathVariable String id) {
-        ModificarUsuarioResponseDto response = usuarioService.modificarUsuario(id, requestDto);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(
+                usuarioMapper.toModificarUsuarioResponseDto(
+                        usuarioService.modificarUsuario(
+                                id, requestDto)));
     }
 
     /**
@@ -65,8 +73,9 @@ public class UsuarioController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<EliminarUsuarioResponseDto> eliminarUsuarios(@PathVariable String id) {
-        EliminarUsuarioResponseDto response = usuarioService.eliminarUsuario(id);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(
+                usuarioMapper.toEliminarUsuarioResponseDto(
+                        usuarioService.eliminarUsuario(id)));
     }
 
     /**
@@ -76,7 +85,8 @@ public class UsuarioController {
      */
     @PatchMapping("/actualizarContrasena/{id}")
     public ResponseEntity<ActualizarContrasenaResponseDto> actualizarContrasenia(@PathVariable String id, @RequestBody ActualizarContrasenaRequestDto requestDto) {
-        ActualizarContrasenaResponseDto response = usuarioService.actualizarContrasena(id, requestDto);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(
+                usuarioMapper.toActualizarContrasenaResponseDto(
+                        usuarioService.actualizarContrasena(id, requestDto)));
     }
 }

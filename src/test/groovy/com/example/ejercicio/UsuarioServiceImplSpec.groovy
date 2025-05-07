@@ -23,7 +23,7 @@ class UsuarioServiceImplSpec extends Specification {
     PatternProperties patternProperties = Mock(PatternProperties)
 
     @Subject
-    UsuarioServiceImpl usuarioService = new UsuarioServiceImpl(usuariosRepository, tokenService, patternProperties)
+    UsuarioServiceImpl usuarioService = new UsuarioServiceImpl(usuariosRepository, tokenService, patternProperties, usuariosMapper, aesUtil)
 
     def "crearUsuario deberia crear un nuevo usuario exitosamente"() {
         given: "un request DTO con datos válidos"

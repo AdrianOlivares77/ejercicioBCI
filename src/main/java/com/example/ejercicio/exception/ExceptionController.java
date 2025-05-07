@@ -62,4 +62,6 @@ public class ExceptionController {
         errors.put("mensaje", ex.getMessage());
         return errors;
     }
+
+    //exception generica
 }

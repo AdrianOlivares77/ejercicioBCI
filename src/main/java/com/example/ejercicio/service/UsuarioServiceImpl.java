@@ -1,21 +1,24 @@
 package com.example.ejercicio.service;
 
 import com.example.ejercicio.configuration.PatternProperties;
+import com.example.ejercicio.controller.mapper.UsuarioMapper;
 import com.example.ejercicio.dto.ActualizarContrasenaRequestDto;
-import com.example.ejercicio.dto.ActualizarContrasenaResponseDto;
-import com.example.ejercicio.dto.CrearUsuarioResponseDto;
-import com.example.ejercicio.dto.EliminarUsuarioResponseDto;
 import com.example.ejercicio.dto.UsuarioDto;
 import com.example.ejercicio.dto.CrearUsuarioRequestDto;
 import com.example.ejercicio.dto.ModificarUsuarioRequestDto;
-import com.example.ejercicio.dto.ModificarUsuarioResponseDto;
 import com.example.ejercicio.exception.ContrasenaInvalidaException;
 import com.example.ejercicio.exception.UsuarioNoExisteException;
 import com.example.ejercicio.repository.JPARepository;
+import com.example.ejercicio.service.dto.ActualizarContrasenaResponse;
+import com.example.ejercicio.service.dto.CrearUsuarioResponse;
+import com.example.ejercicio.service.dto.EliminarUsuarioResponse;
+import com.example.ejercicio.service.dto.ModificarUsuarioResponse;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
+
+import com.example.ejercicio.util.AesUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
@@ -31,26 +34,33 @@ public class UsuarioServiceImpl implements UsuarioService{
     private final TokenServiceImpl tokenService;
     private final PatternProperties patternProperties;
 
+    private final AesUtil aesUtil;
+
     /**
      * Constructor.
+     *
      * @param usuariosRepository clase repository de usuarios.
-     * @param tokenService clase service de token.
-     * @param patternProperties clase config para obtener el pattern de contraseña.
+     * @param tokenService       clase service de token.
+     * @param patternProperties  clase config para obtener el pattern de contraseña.
+     * @param usuariosMapper     clase mapper para usuarios.
+     * @param aesUtil            clase util para encriptar y desencriptar contraseñas.
      */
     public UsuarioServiceImpl(JPARepository usuariosRepository,
                               TokenServiceImpl tokenService,
-                              PatternProperties patternProperties) {
+                              PatternProperties patternProperties, UsuarioMapper usuariosMapper, AesUtil aesUtil) {
         this.usuariosRepository = usuariosRepository;
         this.tokenService = tokenService;
         this.patternProperties = patternProperties;
+        this.aesUtil = aesUtil;
     }
 
     /**
      * Función que crea un nuevo usuario.
+     *
      * @param requestDto de tipo CrearUsuarioRequestDto con los datos para crear un nuevo Usuario.
      * @return CrearUsuarioResponseDto con la data del nuevo usuario creado.
      */
-    public CrearUsuarioResponseDto crearUsuario (CrearUsuarioRequestDto requestDto){
+    public CrearUsuarioResponse crearUsuario (CrearUsuarioRequestDto requestDto){
         try {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             String formattedDateTime = LocalDateTime.now().format(formatter);
@@ -58,7 +68,7 @@ public class UsuarioServiceImpl implements UsuarioService{
             UsuarioDto nuevoUsuario = new UsuarioDto();
             nuevoUsuario.setNombre(requestDto.getNombre());
             nuevoUsuario.setCorreo(requestDto.getCorreo());
-            nuevoUsuario.setContrasenia(requestDto.getContrasenia());
+            nuevoUsuario.setContrasenia(aesUtil.encriptar(requestDto.getContrasenia()));
             nuevoUsuario.setTelefonosList(requestDto.getTelefonosList());
             nuevoUsuario.setCreado((formattedDateTime));
             nuevoUsuario.setModificado(formattedDateTime);
@@ -68,7 +78,7 @@ public class UsuarioServiceImpl implements UsuarioService{
 
             usuariosRepository.save(nuevoUsuario);
 
-            CrearUsuarioResponseDto response = new CrearUsuarioResponseDto();
+            CrearUsuarioResponse response = new CrearUsuarioResponse();
             response.setCreado(nuevoUsuario.getCreado());
             response.setModificado(nuevoUsuario.getModificado());
             response.setUltimoLogin(nuevoUsuario.getUltimoLogin());
@@ -107,14 +117,14 @@ public class UsuarioServiceImpl implements UsuarioService{
      * @param id del usuario que se desea eliminar.
      * @return EliminarUsuarioResponseDto con un mensaje de éxito.
      */
-    public EliminarUsuarioResponseDto eliminarUsuario(String id) {
+    public EliminarUsuarioResponse eliminarUsuario(String id) {
         Optional<UsuarioDto> usuario;
-        EliminarUsuarioResponseDto usuarioEliminado;
+        EliminarUsuarioResponse usuarioEliminado;
         try {
             usuario = usuariosRepository.findById(id);
             if (usuario.isPresent()) {
                 usuariosRepository.deleteById(id);
-                usuarioEliminado = new EliminarUsuarioResponseDto();
+                usuarioEliminado = new EliminarUsuarioResponse();
                 usuarioEliminado.setId(usuario.get().getId());
             } else {
                 throw new UsuarioNoExisteException("Usuario a eliminar no existe");
@@ -128,15 +138,16 @@ public class UsuarioServiceImpl implements UsuarioService{
 
     /**
      * Función que modifica un usuario.
-     * @param id del usuario a modificar.
+     *
+     * @param id      del usuario a modificar.
      * @param usuario objeto con los valores a modificar del usuario.
      * @return ModificarUsuarioResponseDto con los datos modificados del nuevo Usuario.
      */
-    public ModificarUsuarioResponseDto modificarUsuario (String id, ModificarUsuarioRequestDto usuario) {
+    public ModificarUsuarioResponse modificarUsuario (String id, ModificarUsuarioRequestDto usuario) {
 
         validarContrasenaPattern(usuario.getContrasenia());
         UsuarioDto usuarioAModificar;
-        ModificarUsuarioResponseDto usuarioResponse;
+        ModificarUsuarioResponse usuarioResponse;
 
         usuarioAModificar = usuariosRepository.findUsuarioById(id);
 
@@ -146,7 +157,7 @@ public class UsuarioServiceImpl implements UsuarioService{
             usuarioAModificar.setNombre(usuario.getNombre());
             usuarioAModificar.setActivo(usuario.isActivo());
             usuarioAModificar.setCorreo(usuario.getCorreo());
-            usuarioAModificar.setContrasenia(usuario.getContrasenia());
+            usuarioAModificar.setContrasenia(aesUtil.encriptar(usuario.getContrasenia()));
             usuarioAModificar.setTelefonosList(usuario.getTelefonosList());
             usuarioAModificar.setModificado(formattedDateTime);
             usuarioAModificar.setCreado(usuarioAModificar.getCreado());
@@ -155,13 +166,13 @@ public class UsuarioServiceImpl implements UsuarioService{
 
             usuariosRepository.save(usuarioAModificar);
 
-            usuarioResponse = new ModificarUsuarioResponseDto();
+            usuarioResponse = new ModificarUsuarioResponse();
             usuarioResponse.setId(id);
             usuarioResponse.setNombre(usuarioAModificar.getNombre());
             usuarioResponse.setActivo(usuarioAModificar.isActivo());
             usuarioResponse.setCorreo(usuarioAModificar.getCorreo());
-            usuarioResponse.setContrasenia(usuarioAModificar.getContrasenia());
-            usuarioResponse.setTelefonosList(usuarioAModificar.getTelefonosList());
+            usuarioResponse.setContrasenia(usuario.getContrasenia());
+            usuarioResponse.setTelefonosList(UsuarioMapper.toTelefonos(usuarioAModificar.getTelefonosList()));
             usuarioResponse.setModificado(formattedDateTime);
             usuarioResponse.setCreado(usuarioAModificar.getCreado());
             usuarioResponse.setToken(usuarioAModificar.getToken());
@@ -175,23 +186,24 @@ public class UsuarioServiceImpl implements UsuarioService{
 
     /**
      * Función para actualizar la contraseña de un Usuario específico.
-     * @param id dle usuario a modificar la contraseña.
+     *
+     * @param id         dle usuario a modificar la contraseña.
      * @param requestDto objeto con la nueva constraseña
      * @return ActualizarContrasenaResponseDto con mensaje de éxito.
      */
-    public ActualizarContrasenaResponseDto actualizarContrasena(String id, ActualizarContrasenaRequestDto requestDto) {
+    public ActualizarContrasenaResponse actualizarContrasena(String id, ActualizarContrasenaRequestDto requestDto) {
 
         validarContrasenaPattern(requestDto.getContrasenia());
         UsuarioDto usuarioACambiarContrasena;
 
         usuarioACambiarContrasena = usuariosRepository.findUsuarioById(id);
         if (usuarioACambiarContrasena != null){
-            usuarioACambiarContrasena.setContrasenia(requestDto.getContrasenia());
+            usuarioACambiarContrasena.setContrasenia(aesUtil.encriptar(requestDto.getContrasenia()));
             usuariosRepository.save(usuarioACambiarContrasena);
         } else {
             throw new UsuarioNoExisteException("usuario con esa id no existe");
         }
-        ActualizarContrasenaResponseDto response = new ActualizarContrasenaResponseDto();
+        ActualizarContrasenaResponse response = new ActualizarContrasenaResponse();
         response.setResultado("Contraseña actualizada correctamente");
         return response;
     }
